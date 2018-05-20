@@ -1,0 +1,124 @@
+# barman_r.krb
+     
+# Взять шейкер, если он свободен и один и стаканов пуст
+robot_grasp_shaker:
+    foreach 
+        barman_f.Robot(True)
+    assert
+        barman_f.Robot1(True)       
+
+# Заполнить шейкер, если он ещё не заполнен и находится в руках у робота  
+robot_dispense:
+    foreach 
+        barman_f.Robot1(True)
+    assert
+        barman_f.Robot2(True)
+        
+# Взболтать шейкер, если он ещё не взболтан  
+robot_shake:
+    foreach 
+        barman_f.Robot2(True)
+    assert
+        barman_f.Robot3(True)
+        
+# Заполнить стакан готовой смесью, если он ещё не заполнен  
+robot_pour:
+    foreach 
+        barman_f.Robot3(True)
+    assert
+        barman_f.Robot4(True)
+
+# Поставить шейкер на место, если все стаканы не пусты
+robot_put_shaker:
+    foreach 
+        barman_f.Robot8(True)
+    assert
+        barman_f.Robot5(True)
+
+# Взять стакан, если он свободен, и коктейль готов
+robot_grasp_glass:
+    foreach
+        barman_f.Robot5(True)
+    assert
+        barman_f.Robot6(True)
+        
+# Отдать готовый коктейль  
+robot_give_glass:
+    foreach 
+        barman_f.Robot6(True)
+    assert
+        barman_f.Robot7(True)
+
+################################## Обратный вызов для плана
+# Отдать стакан
+robot_give_glass_back:
+    use robot_give_glass() taking(n)
+    when 
+        barman_f.Robot6(True)
+    with
+        print('Робот отдал стакан', n, 'с готовым коктейлем')
+
+# Взять стакан
+robot_grasp_glass_back:
+    use robot_grasp_glass() taking(n)
+    when
+        barman_f.Robot5(True)
+    with
+        robot_give_glass_back(1,n)
+        print('Робот взял стакан', n, 'с готовым коктейлем')
+
+# Поставить шейкер
+robot_put_shaker_back:
+    use robot_put_shaker() taking(n)
+    when 
+        barman_f.Robot8(True)
+    with
+        robot_grasp_glass_back(1,n)
+        print('Робот поставил шейкер')
+
+# Заполнить свободный стакан
+robot_pour_back:
+    use robot_pour() taking(n)
+    when 
+        barman_f.Robot3(True)
+    with
+        print('Робот заполнил свободный стакан', n, 'готовой смесью из шейкера')
+
+# Взболтать шейкер
+robot_shake_back:
+    use robot_shake() taking(n)
+    when 
+        barman_f.Robot2(True)
+    with
+        robot_pour_back(1,n)
+        print('Робот взболтал шейкер')
+
+# Заполнить шейкер
+robot_dispense_back:
+    use robot_dispense() taking(n)
+    when 
+        barman_f.Robot1(True)
+    with
+        robot_shake_back(1,n)
+        print('Робот заполнил шейкер')
+        
+# Взять шейкер
+robot_grasp_shaker_back:
+    use robot_grasp_shaker() taking(n)
+    when
+        barman_f.Robot(True) 
+    with
+        robot_dispense_back(1,n)
+        print('Робот взял шейкер')      
+
+# Конец алгоритма
+robot_final:
+    use print()
+        
+# Алгоритм
+robot_STRIPS:
+    use final()
+    when
+        barman_f.Robot9(True)
+    with
+        print('Алгоритм закончен')

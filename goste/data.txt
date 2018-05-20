@@ -1,0 +1,3 @@
+This is message, length=32 bytes
+hello
+Suppose the original message has length = 50 bytes
